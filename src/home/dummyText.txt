@@ -1,0 +1,175 @@
+"android": "./node_modules/react-native-cli/index.js run-android",
+"android-emulator": "emulator -avd YourAppName -scale 0.4 -gpu on -memory 2048",
+"android-emulator-create": "android create avd -n SimpleCalculator -t 1 -b x86 --skin 1080x1920 --device 'Nexus 5'",
+"android-emulator-delete": "android delete avd -n SimpleCalculator",
+
+"android-build": "cd android && ./gradlew assembleDebug && npm run android-emulator-create"
+
+
+
+    //
+    //
+    // for (let i = 0; i < equation.length; i++) {
+    //   let equationData = equation.charAt(i)
+    //   console.log(equationData)
+    //
+    //   let digitRegex = /^-?\d+\.?\d*$/
+    //
+    //   if (equationData.match(digitRegex)) {
+    //     digit = digit + equationData
+    //     if (op === '') {
+    //       n1 = Number(digit)
+    //     } if (op !== '') {
+    //       n2 = Number(digit)
+    //       res = calculate(n1, op, n2)
+    //     }
+    //     console.log('Your Registration number has accepted....')
+    //   } else {
+    //     if ((i - 1) > 0) {
+    //       let prevData = equation.charAt(i - 1)
+    //       if (prevData.match(/^[*/]$/)) {
+    //         digit = digit + equationData
+    //         continue
+    //       } else if (!prevData.match(digitRegex)) {
+    //         aryOP[aryOP.length - 1] = op
+    //         op = equationData
+    //         continue
+    //       }
+    //     }
+    //
+    //     if (op !== '') {
+    //       aryN1.push(res)
+    //       aryOP.push(op)
+    //       aryN2.push(n2)
+    //       op = equationData
+    //       n1 = res
+    //       n2 = 0
+    //       digit = ''
+    //     } else {
+    //       op = equationData
+    //       aryN1.push(Number(digit))
+    //       digit = ''
+    //       // n1 = 0
+    //     }
+    //     console.log('Please input numeric characters only')
+    //   }
+    // }
+    //
+    // digit = String(n2)
+    //
+    // for (let i = equation.length; i > 0; i--) {
+    //   let equationData = equation.charAt(i - 1)
+    //   console.log(equationData)
+    //
+    //   let digitRegex = /^-?\d+\.?\d*$/
+    //
+    //   if (equationData.match(digitRegex)) {
+    //     digit = digit.slice(0, -1)
+    //     if (digit.match(digitRegex)) {
+    //       if (op !== '') {
+    //         n2 = Number(digit)
+    //         res = calculate(n1, op, n2)
+    //       }
+    //     } else if (digit !== '') {
+    //       digit = digit.slice(0, -1)
+    //       i--
+    //
+    //       res = (aryN1.length > 0) ? aryN1[(aryN1.length - 1) > 0 ? (aryN1.length - 1) : 0] : res
+    //       aryN1 = (aryN1.length > 0) ? aryN1.slice(0, -1) : aryN1
+    //       n1 = (aryN1.length > 0) ? aryN1[(aryN1.length - 1) > 0 ? (aryN1.length - 1) : 0] : n1
+    //       n2 = (aryN2.length > 0) ? aryN2[(aryN2.length - 1) > 0 ? (aryN2.length - 1) : 0] : 0
+    //       digit = String(n2)
+    //       aryN2 = (aryN2.length > 0) ? aryN2.slice(0, -1) : aryN2
+    //     } else if (digit === '') {
+    //       res = (aryN1.length > 0) ? aryN1[(aryN1.length - 1) > 0 ? (aryN1.length - 1) : 0] : res
+    //       aryN1 = (aryN1.length > 0) ? aryN1.slice(0, -1) : aryN1
+    //       n1 = (aryN1.length > 0) ? aryN1[(aryN1.length - 1) > 0 ? (aryN1.length - 1) : 0] : n1
+    //       n2 = (aryN2.length > 0) ? aryN2[(aryN2.length - 1) > 0 ? (aryN2.length - 1) : 0] : 0
+    //       digit = (n2 === 0) ? String(n1) : String(n2)
+    //       aryN2 = (aryN2.length > 0) ? aryN2.slice(0, -1) : aryN2
+    //     }
+    //   } else {
+    //     console.log('test')
+    //     if (op !== '') {
+    //       op = (aryOP.length > 0) ? aryOP[(aryOP.length - 1) > 0 ? (aryOP.length - 1) : 0] : ''
+    //       aryOP = (aryOP.length > 0) ? aryOP.slice(0, -1) : aryOP
+    //     }
+    //   }
+    // }
+
+    /**/
+    // switch (butttonId) {
+    //   case ButtonEnum.Zero:
+    //     let digit = getState().home.equation + butttonId
+    //     dispatch(updateCount({expression: digit, result: ''}))
+    //     break
+      // case ButtonEnum.One:
+      //   digit = getState().home.equation + '1'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Two:
+      //   digit = getState().home.equation + '2'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Three:
+      //   digit = getState().home.equation + '3'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Four:
+      //   digit = getState().home.equation + '4'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Five:
+      //   digit = getState().home.equation + '5'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Six:
+      //   digit = getState().home.equation + '6'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Seven:
+      //   digit = getState().home.equation + '7'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Eight:
+      //   digit = getState().home.equation + '8'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Nine:
+      //   digit = getState().home.equation + '9'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Point:
+      //   digit = getState().home.equation + '.'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Plus:
+      //   let res = getState().home.equation.split(/[*+-/]+/)
+      //   if (res.length > 1) {
+      //     let result = 0
+      //     for (let i = 0; i < res.length; i++) {
+      //       result += Number(res[i])
+      //     }
+      //     alert(result)
+      //   }
+      //   digit = getState().home.equation + '+'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Minus:
+      //   res = getState().home.equation.split(/[*+-/]+/)
+      //   if (res.length > 1) {
+      //     let result = 0
+      //     for (let i = 0; i < res.length; i++) {
+      //       result += Number(res[i])
+      //     }
+      //     alert(result)
+      //   }
+      //   digit = getState().home.equation + '-'
+      //   dispatch(updateCount({value: digit}))
+      //   break
+      // case ButtonEnum.Clear:
+      //   digit = getState().home.equation.slice(0, -1)
+      //   dispatch(updateCount({value: digit}))
+      //   break
+    //   default:
+    // }
