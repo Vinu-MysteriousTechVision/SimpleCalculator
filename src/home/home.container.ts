@@ -24,7 +24,13 @@ const mapStateToProps: MapStateToProps<IHomeComponentStateProps, OwnProps, RootS
 // NOTE: dispatch Redux action from component's event. e.g. `onPress: dispatch(actions.submit({}))`
 const mapDispatchToProps: MapDispatchToProps<IHomeComponentDispatchProps, OwnProps> = (dispatch: Dispatch<Action>, ownProps: OwnProps) => ({
   onAddCount: (butttonId: ButtonEnum) => {
-    dispatch(actions.calcController(butttonId))
+    if (butttonId === ButtonEnum.Clear || butttonId === ButtonEnum.AllClear) {
+      dispatch(actions.removeCalculationData(butttonId))
+    } else if (butttonId === ButtonEnum.Equals) {
+      dispatch(actions.getResults(butttonId))
+    } else {
+      dispatch(actions.addCalculationData(butttonId))
+    }
   }
 })
 

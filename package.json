@@ -11,15 +11,20 @@
     "clean-start": "npm run clean && npm run rc-start",
     "fresh-install": "rm -rf $TMPDIR/react-* && watchman watch-del-all && rm -rf ios/build/ModuleCache/* && rm -rf node_modules/ && yarn cache clean && yarn",
     "fresh-start": "npm run fresh-install && npm run rc-start",
+
     "ios-build": "xcodebuild  -project ios/SimpleCalculator.xcodeproj -scheme SimpleCalculator -sdk iphonesimulator -destination platform='iOS Simulator',name='iPhone 6 Plus' -derivedDataPath ios/build",
-    "ios-launch-sim": "open `xcode-select -p`/Applications/Simulator.app/",
     "ios-install-app": "xcrun simctl install booted ios/build/Build/Products/Debug-iphonesimulator/SimpleCalculator.app",
     "ios-launch-installed": "xcrun simctl launch booted com.MysteriousTechVision.SimpleCalculator",
-    "ios": "npm run ios-build && npm run ios-launch-sim || npm run ios-install-app && npm run ios-launch-installed"
+
+    "android-create-emulator": "~/Library/Android/sdk/tools/bin/avdmanager create avd -f -n EmulatorSimpleCalculator -k 'system-images;android-25;google_apis;x86'",
+    "android-launch-emulator": "~/Library/Android/sdk/tools/emulator -avd EmulatorSimpleCalculator -netdelay none -netspeed full",
+    "android-build": "cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "react": "16.3.1",
     "react-native": "0.55.4",
+    "react-native-elements": "^0.19.1",
+    "react-native-vector-icons": "^4.6.0",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
     "redux-thunk": "^2.3.0",

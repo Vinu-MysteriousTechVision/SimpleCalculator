@@ -3,10 +3,10 @@ import {
   Platform,
   StyleSheet,
   Text,
-  TouchableHighlight,
   View,
   ViewStyle
 } from 'react-native'
+import { Button } from 'react-native-elements'
 
 export interface ICustomButtonStateProps {
   title: string
@@ -21,23 +21,26 @@ interface ICustomButtonComponentProps
   extends ICustomButtonStateProps,
     ICustomButtonDispatchProps {
   buttonStyle?: ViewStyle
+  titleStyle?: ViewStyle
 }
 
 export const CustomButton: React.SFC<ICustomButtonComponentProps> = props => {
-  const { buttonStyle, title, onPressAction, onLongPressAction } = props
+  const { buttonStyle, title, titleStyle, onPressAction, onLongPressAction } = props
   return (
-    <TouchableHighlight style={[CustomButtonStyles.buttonContainer, buttonStyle]}
-      onPress={onPressAction}
-      onLongPress={onLongPressAction}
-      underlayColor='#FFFFFF40'>
-      <Text style={CustomButtonStyles.title}>{title}</Text>
-    </TouchableHighlight>
+    <View style={[CustomButtonStyles.buttonContainer, buttonStyle]}>
+      <Button
+        buttonStyle={{backgroundColor: 'transparent'}}
+        title={title}
+        textStyle={CustomButtonStyles.title}
+        onPress={onPressAction}
+        onLongPress={onLongPressAction}/>
+    </View>
   )
 }
 
 export const CustomButtonStyles = StyleSheet.create({
   buttonContainer: {
-    flex: 1, marginHorizontal: 5, backgroundColor: 'gray', justifyContent: 'center', alignItems: 'center'
+    flex: 1, backgroundColor: 'transparent', justifyContent: 'center'
   },
   title: {
     height: 24,
@@ -45,7 +48,7 @@ export const CustomButtonStyles = StyleSheet.create({
     fontWeight: '300',
     lineHeight: Platform.select({
       ios: 0,
-      android: 18
+      android: 26
     }),
     textAlign: 'left',
     color: '#FFFFFF'

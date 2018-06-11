@@ -1,23 +1,18 @@
 import { Action, combineReducers } from 'redux'
 import { reducerWithInitialState } from 'typescript-fsa-reducers'
 import { actions, IPayload, ICalcControllerData } from './actions'
-// NOTE: Below are just an example.
 
 export interface State {
-  /*
-   * NOTE: switch home screen's content depending on the user's status in the future.
-   * For the initial development userStatus consider as number
-   */
   equation: string
   processingData: [any]
   result: string
-  n1: number
-  op: string
-  n2: number
+  firstOperand: number
+  operator: string
+  secondOperand: number
   res: number
-  aryN1: number[]
-  aryOP: any[]
-  aryN2: number[]
+  aryResults: number[]
+  aryOperators: any[]
+  arySecondOperands: number[]
   digit: string
 }
 
@@ -25,38 +20,39 @@ const initialState: State = {
   equation: '',
   result: '',
   processingData: [0],
-  n1: 0,
-  op: '',
-  n2: 0,
+  firstOperand: 0,
+  operator: '',
+  secondOperand: 0,
   res: 0,
-  aryN1: [],
-  aryOP: [],
-  aryN2: [],
+  aryResults: [],
+  aryOperators: [],
+  arySecondOperands: [],
   digit: ''
 }
 
 /*
- * topPage onPressTakeExam button action handler
+ * updateExpressionAndResultHandler action handler
  */
-const updateCountHandler = (state: State, payload: IPayload): State => ({
+const updateExpressionAndResultHandler = (state: State, payload: IPayload): State => ({
   ...state,
   equation: payload.expression,
   result: payload.result
 })
 
-const updateCalcCondrollerDataHandler = (state: State, payload: ICalcControllerData): State => ({
+const updateCalcCondrollerDataHandler = (state: State, payload: ICalcControllerData): State => {
+  return ({
   ...state,
-  n1: payload.n1,
-  op: payload.op,
-  n2: payload.n2,
+  firstOperand: payload.firstOperand,
+  operator: payload.operator,
+  secondOperand: payload.secondOperand,
   res: payload.res,
-  aryN1: payload.aryN1,
-  aryOP: payload.aryOP,
-  aryN2: payload.aryN2,
+  aryResults: payload.aryResults,
+  aryOperators: payload.aryOperators,
+  arySecondOperands: payload.arySecondOperands,
   digit: payload.digit
-})
+})}
 
 export const reducer = reducerWithInitialState(initialState)
-  .case(actions.updateCount, updateCountHandler)
+  .case(actions.updateExpressionAndResult, updateExpressionAndResultHandler)
   .case(actions.updateCalcCondrollerData, updateCalcCondrollerDataHandler)
   .build()
