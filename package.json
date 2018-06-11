@@ -1,0 +1,50 @@
+{
+  "name": "SimpleCalculator",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "lint": "tslint -t codeFrame src/**/*.ts{,x} --fix",
+    "test": "jest",
+    "rc-start": "npm start -- --reset-cache",
+    "clean": "rm -rf $TMPDIR/react-* && watchman watch-del-all && yarn cache clean",
+    "clean-start": "npm run clean && npm run rc-start",
+    "fresh-install": "rm -rf $TMPDIR/react-* && watchman watch-del-all && rm -rf ios/build/ModuleCache/* && rm -rf node_modules/ && yarn cache clean && yarn",
+    "fresh-start": "npm run fresh-install && npm run rc-start",
+
+    "ios-build": "xcodebuild  -project ios/SimpleCalculator.xcodeproj -scheme SimpleCalculator -sdk iphonesimulator -destination platform='iOS Simulator',name='iPhone 6 Plus' -derivedDataPath ios/build",
+    "ios-install-app": "xcrun simctl install booted ios/build/Build/Products/Debug-iphonesimulator/SimpleCalculator.app",
+    "ios-launch-installed": "xcrun simctl launch booted com.MysteriousTechVision.SimpleCalculator",
+
+    "android-create-emulator": "~/Library/Android/sdk/tools/bin/avdmanager create avd -f -n EmulatorSimpleCalculator -k 'system-images;android-25;google_apis;x86'",
+    "android-launch-emulator": "~/Library/Android/sdk/tools/emulator -avd EmulatorSimpleCalculator -netdelay none -netspeed full",
+    "android-build": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "react": "16.3.1",
+    "react-native": "0.55.4",
+    "react-native-elements": "^0.19.1",
+    "react-native-vector-icons": "^4.6.0",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-thunk": "^2.3.0",
+    "tslib": "^1.9.2",
+    "typescript-fsa": "^3.0.0-beta-2",
+    "typescript-fsa-reducers": "^0.4.5"
+  },
+  "devDependencies": {
+    "@types/react": "^16.3.16",
+    "@types/react-native": "^0.55.17",
+    "@types/react-redux": "^6.0.2",
+    "babel-jest": "23.0.1",
+    "babel-preset-react-native": "4.0.0",
+    "jest": "23.1.0",
+    "react-native-typescript-transformer": "^1.2.9",
+    "react-test-renderer": "16.3.1",
+    "tslint": "^5.10.0",
+    "typescript": "^2.9.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
