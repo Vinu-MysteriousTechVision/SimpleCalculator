@@ -5,6 +5,7 @@ import { actions, IPayload, ICalcControllerData } from './actions'
 export interface State {
   equation: string
   processingData: [any]
+  prevResult: string
   result: string
   firstOperand: number
   operator: string
@@ -18,6 +19,7 @@ export interface State {
 
 const initialState: State = {
   equation: '',
+  prevResult: '',
   result: '',
   processingData: [0],
   firstOperand: 0,
@@ -36,6 +38,7 @@ const initialState: State = {
 const updateExpressionAndResultHandler = (state: State, payload: IPayload): State => ({
   ...state,
   equation: payload.expression,
+  prevResult: payload.prevResult,
   result: payload.result
 })
 

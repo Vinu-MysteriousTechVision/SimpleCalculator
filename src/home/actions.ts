@@ -7,6 +7,7 @@ const actionCreator = actionCreatorFactory()
 
 export interface IPayload {
   expression: string
+  prevResult: string
   result: string
 }
 
@@ -25,6 +26,8 @@ export interface ICalcControllerData {
 const updateExpressionAndResult = actionCreator<IPayload>('Home/updateExpressionAndResult')
 const updateCalcCondrollerData = actionCreator<ICalcControllerData>('Home/updateCalcCondrollerData')
 
+// A utility method to apply an operator 'op' on operands 'a'
+// and 'b'. Return the result.
 function calculate(firstOperand: number, operator: string, secondOperand: number) {
   switch (operator) {
     case '+':
@@ -34,10 +37,21 @@ function calculate(firstOperand: number, operator: string, secondOperand: number
     case '*':
       return firstOperand * secondOperand
     case '/':
+      if (secondOperand === 0)
+        console.log('Cannot divide by zero')
       return firstOperand / secondOperand
     default:
     return 0
   }
+}
+
+// Returns true if 'op2' has higher or same precedence as 'op1',
+// otherwise returns false.
+const hasPrecedence = (op1: string, op2: string) => {
+    if ((op1 === '*' || op1 === '/') && (op2 === '+' || op2 === '-'))
+        return false
+    else
+        return true
 }
 
 function isNumeric(n: any) {
@@ -47,127 +61,32 @@ function isNumeric(n: any) {
 const addCalculationData = (butttonId: ButtonEnum): any => {
   return (dispatch: Dispatch<any>, getState: () => RootState) => {
 
-    let firstOperand = getState().home.firstOperand
-    let operator = getState().home.operator
-    let secondOperand = getState().home.secondOperand
-    let res = getState().home.res
-    let aryResults: number[] = getState().home.aryResults
-    let aryOperators: any[] = getState().home.aryOperators
-    let arySecondOperands: number[] = getState().home.arySecondOperands
-    let digit = getState().home.digit
-    const digitRegex = /^-?\d+\.?\d*$/
-
-    if (getState().home.equation.slice(-1) === butttonId) {
-      return
-    }
-    let tempEquation = getState().home.equation + butttonId
-    if ((tempEquation.length === 1) && (tempEquation.match(/^[*/]$/))) {
-      return
-    }
-    let lastEquationValue = butttonId + ''
-
+    let tempEquation = getState().home.equation
+    const aryDigits = tempEquation.split((/\*|\+|-|\//))
     if (butttonId === ButtonEnum.Point) {
-      if (digit.indexOf('.') > -1) return
-      digit = digit + lastEquationValue
-      dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-      dispatch(updateExpressionAndResult({expression: tempEquation, result: (res === 0) ? '' : String(res)}))
-      return
+      if (aryDigits[aryDigits.length - 1].indexOf('.') > -1) return
     }
 
-    if (lastEquationValue.match(digitRegex)) {
-      digit = digit + lastEquationValue
-      if (operator === '') {
-        firstOperand = Number(digit)
-      } if (operator !== '') {
-        secondOperand = Number(digit)
-        let tempRes = calculate(firstOperand, operator, secondOperand)
-        if (isNumeric(tempRes)) {
-          res = tempRes
-        } else {
-          dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-          dispatch(updateExpressionAndResult({expression: tempEquation, result: 'Error'}))
-          return
-        }
+    if (tempEquation.length <= 1 && String(butttonId).match(/^[*/]$/)) return
+    const val = tempEquation.slice(-1, -2)
+    if (tempEquation.length > 2 && tempEquation.charAt(tempEquation.length - 2).match(/^[*/]$/)) {
+      if (String(butttonId).match(/^[-]$/) && tempEquation.slice(-1).match(/^[-]$/)) {
+        tempEquation = tempEquation
+      } else if (String(butttonId).match(/^[+]$/) && tempEquation.slice(-1).match(/^[-]$/)) {
+        tempEquation = tempEquation.slice(0, -1)
+      } else if (String(butttonId).match(/^[*/]$/) && tempEquation.slice(-1).match(/^[-]$/)) {
+        tempEquation = tempEquation.slice(0, -2) + butttonId
       }
+    } else if (tempEquation.slice(-1).match(/^[*/]$/) && String(butttonId).match(/^[-]$/)) {
+      tempEquation = getState().home.equation + butttonId
+    } else if (tempEquation.slice(-1).match(/^[*/+-]$/) && String(butttonId).match(/^[*/+-]$/)) {
+      tempEquation = tempEquation.slice(0, -1) + butttonId
     } else {
-
-      if (tempEquation.length > 2) {
-        let prevData = tempEquation.charAt(tempEquation.length - 2)
-        if (!prevData.match(digitRegex)) {
-          digit = ''
-          if (prevData !== operator) {
-            if (lastEquationValue.match(/^[*/]$/)) {
-              tempEquation = tempEquation.slice(0, -3)
-              tempEquation = tempEquation + lastEquationValue
-              operator = lastEquationValue
-              if (aryOperators.length > 0) {
-                aryOperators.slice(0, -1)
-                aryOperators.push(operator)
-              }
-            } else if (lastEquationValue.match(/^[-+]$/)) {
-              if (lastEquationValue === '+') {
-                tempEquation = tempEquation.slice(0, -2)
-              } else {
-                digit = digit + lastEquationValue
-              }
-            }
-          } else {
-            if (prevData.match(/^[*/]$/)) {
-              if (lastEquationValue === '-') {
-                digit = '-'
-              } else {
-                tempEquation = tempEquation.slice(0, -2)
-                tempEquation = tempEquation + lastEquationValue
-                operator = lastEquationValue
-                if (aryOperators.length > 0) {
-                  aryOperators.slice(0, -1)
-                  aryOperators.push(operator)
-                }
-              }
-            } else {
-              tempEquation = tempEquation.slice(0, -2)
-              tempEquation = tempEquation + lastEquationValue
-              operator = lastEquationValue
-              if (aryOperators.length > 0) {
-                aryOperators.slice(0, -1)
-                aryOperators.push(operator)
-              }
-            }
-          }
-          dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-          dispatch(updateExpressionAndResult({expression: tempEquation, result: (res === 0) ? '' : String(res)}))
-          return
-        }
-      }
-      if (tempEquation.length === 2 && !tempEquation.charAt(0).match(digitRegex)) {
-        tempEquation = lastEquationValue.match(/^[*/]$/) ? tempEquation.slice(0, -1) : lastEquationValue
-        if (tempEquation === '-') {
-          digit = digit + tempEquation
-        } else {
-          digit = ''
-        }
-        operator = ''
-        dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-        dispatch(updateExpressionAndResult({expression: tempEquation, result: (res === 0) ? '' : String(res)}))
-        return
-      }
-
-      if (operator !== '') {
-        aryResults.push(res)
-        aryOperators.push(operator)
-        arySecondOperands.push(secondOperand)
-        operator = lastEquationValue
-        firstOperand = res
-        secondOperand = 0
-        digit = ''
-      } else {
-        operator = lastEquationValue
-        aryResults.push(Number(digit))
-        digit = ''
-      }
+      tempEquation = getState().home.equation + butttonId
     }
-    dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-    dispatch(updateExpressionAndResult({expression: tempEquation, result: (res === 0 && (aryOperators.length === 0)) ? '' : String(res)}))
+
+    let res = evaluate(tempEquation)
+    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: isNumeric(res) ? String(getState().home.prevResult) : String(getState().home.result),  result: isNumeric(res) ? String(res) : String(getState().home.result)}))
   }
 }
 
@@ -175,103 +94,75 @@ const removeCalculationData = (butttonId: ButtonEnum): any => {
   return (dispatch: Dispatch<any>, getState: () => RootState) => {
 
     if (butttonId === ButtonEnum.AllClear) {
-      dispatch(updateExpressionAndResult({expression: '', result: ''}))
+      dispatch(updateExpressionAndResult({expression: '', result: '', prevResult: ''}))
       dispatch(updateCalcCondrollerData({firstOperand: 0, operator: '', secondOperand: 0, res: 0, aryResults: [], aryOperators: [], arySecondOperands: [], digit: ''}))
       return
     }
 
-    let firstOperand = getState().home.firstOperand
-    let operator = getState().home.operator
-    let secondOperand = getState().home.secondOperand
-    let res = getState().home.res
-    let aryResults: number[] = getState().home.aryResults
-    let aryOperators: any[] = getState().home.aryOperators
-    let arySecondOperands: number[] = getState().home.arySecondOperands
-    let digit = getState().home.digit
-    const digitRegex = /^-?\d+\.?\d*$/
-
-    let tempEquation = getState().home.equation
-    let lastEquationValue = tempEquation.charAt(tempEquation.length - 1)
-    tempEquation = tempEquation.slice(0, -1)
-    digit = String(secondOperand)
-    digit = digit.slice(0, -1)
-
-    if (tempEquation.length === 0) {
-      dispatch(updateExpressionAndResult({expression: '', result: ''}))
-      dispatch(updateCalcCondrollerData({firstOperand: 0, operator: '', secondOperand: 0, res: 0, aryResults: [], aryOperators: [], arySecondOperands: [], digit: ''}))
-      return
-    }
-
-    if (lastEquationValue === '.' && operator !== '') {
-      dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-      dispatch(updateExpressionAndResult({expression: tempEquation, result: (res === 0) ? '' : String(res)}))
-      return
-    }
-
-    if (lastEquationValue.match(digitRegex) && digit.match(digitRegex)) {
-      if (operator !== '') {
-        secondOperand = Number(digit)
-        let tempRes = calculate(firstOperand, operator, secondOperand)
-        if (isNumeric(tempRes)) {
-          res = tempRes
-        } else {
-          dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-          dispatch(updateExpressionAndResult({expression: tempEquation, result: 'Error'}))
-          return
-        }
-      }
-    } else if (!lastEquationValue.match(digitRegex) || (digit.length === 1 && !digit.slice(-1).match(digitRegex))) {
-      if (digit.length === 1) {
-        digit = digit.slice(0, -1)
-        res = (aryResults.length > 0) ? aryResults[(aryResults.length - 1)] : firstOperand
-        secondOperand = (arySecondOperands.length > 0) ? arySecondOperands[(arySecondOperands.length - 1)] : 0
-        dispatch(updateExpressionAndResult({expression: tempEquation, result: String(res)}))
-        dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-        return
-      } else {
-        if (tempEquation.length > 2) {
-          let prevData = tempEquation.charAt(tempEquation.length - 1)
-          if (!prevData.match(digitRegex) && prevData.match(/^[*/]$/)) {
-            dispatch(updateExpressionAndResult({expression: tempEquation, result: String(res)}))
-            dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
-            return
-          }
-        }
-      }
-
-      if (operator !== '') {
-        operator = (aryOperators.length > 0) ? aryOperators[(aryOperators.length - 1) > 0 ? (aryOperators.length - 1) : 0] : ((digit.length > 0) ? operator : '')
-        aryOperators = (aryOperators.length > 0) ? aryOperators.slice(0, -1) : aryOperators
-
-        aryResults = (aryResults.length > 0) ? aryResults.slice(0, -1) : aryResults
-        firstOperand = (aryResults.length > 0) ? aryResults[(aryResults.length - 1)] : firstOperand
-        secondOperand = (arySecondOperands.length > 0) ? arySecondOperands[(arySecondOperands.length - 1)] : 0
-        arySecondOperands = (arySecondOperands.length > 0) ? arySecondOperands.slice(0, -1) : arySecondOperands
-      }
-    } else {
-      res = (aryResults.length > 0) ? aryResults[(aryResults.length - 1)] : firstOperand
-      digit = ''
-    }
-
-    if (operator === '') {
-      dispatch(updateExpressionAndResult({expression: tempEquation, result: ''}))
-      dispatch(updateCalcCondrollerData({firstOperand: Number(tempEquation), operator: '', secondOperand: 0, res: Number(tempEquation), aryResults: [], aryOperators: [], arySecondOperands: [], digit: tempEquation}))
-      return
-    }
-    dispatch(updateExpressionAndResult({expression: tempEquation, result: String(res)}))
-    dispatch(updateCalcCondrollerData({firstOperand, operator, secondOperand, res, aryResults, aryOperators, arySecondOperands, digit}))
+    let tempEquation = getState().home.equation.slice(0, -1)
+    let res = evaluate(tempEquation)
+    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult), result: isNumeric(res) ? String(res) : String(getState().home.prevResult)}))
   }
 }
 
 const getResults = (butttonId: ButtonEnum): any => {
   return (dispatch: Dispatch<any>, getState: () => RootState) => {
-    let res = getState().home.res
-    if (butttonId === ButtonEnum.Equals) {
-      dispatch(updateExpressionAndResult({expression: String(res), result: ''}))
-      dispatch(updateCalcCondrollerData({firstOperand: res, operator: '', secondOperand: 0, res: 0, aryResults: [], aryOperators: [], arySecondOperands: [], digit: String(res)}))
-      return
+    dispatch(updateExpressionAndResult({expression: String(getState().home.result), result: '', prevResult: ''}))
+  }
+}
+
+const evaluate = (expression: String) => {
+  const equation = expression
+  const arySplitEquation = expression.split('')
+
+  let isLastdigitIsOperator: boolean = false
+  let i = 0
+  let operands: number[] = []
+  let operators: string[] = []
+
+  while (i < equation.length) {
+    let value: string = ''// equation.slice(i, 1)
+    if (arySplitEquation[i].match(/^[0-9.]$/) || (isLastdigitIsOperator && arySplitEquation[i] === '-')) {
+      // add as digit
+      isLastdigitIsOperator = false
+      value = value + arySplitEquation[i]
+      i++
+      while (i < equation.length && (arySplitEquation[i].match(/^[0-9.]+$/))) {
+        // check next value is digit
+        value = value + arySplitEquation[i]
+        i++
+      }
+      operands.push(Number(value))
+    } else {
+      // add as operand
+      isLastdigitIsOperator = true
+      // IF lastEquationValue is operator and current value is '-' then its digit
+      while ((operators.length > 0) && hasPrecedence(arySplitEquation[i], operators[0])) {
+
+        let value1 = operands[operands.length - 1] //
+        operands.pop()
+        let operator = operators[operators.length - 1] //
+        operators.pop()
+        let value2 = operands[operands.length - 1] //
+        operands.pop()
+        operands.push(calculate(value1, operator, value2))
+      }
+      operators.push(arySplitEquation[i])
+      i++
     }
   }
+
+  while (operators.length > 0) {
+
+    let value1 = operands[operands.length - 1] //
+    operands.pop()
+    let operator = operators[operators.length - 1] //
+    operators.pop()
+    let value2 = operands[operands.length - 1] //
+    operands.pop()
+    operands.push(calculate(value1, operator, value2))
+  }
+  return operands[0]
 }
 
 export const actions = {
