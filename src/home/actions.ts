@@ -21,7 +21,7 @@ function calculate(firstOperand: number, operator: string, secondOperand: number
     case '+':
       return String(firstOperand + secondOperand)
     case '-':
-      return String(firstOperand - secondOperand)
+      return String(secondOperand - firstOperand)
     case '*':
       return String(firstOperand * secondOperand)
     case '/':

@@ -6,11 +6,16 @@ import {
   StyleSheet,
   Text,
   View,
-  BackHandler
+  BackHandler,
+  Animated,
+  Easing,
+  Dimensions
 } from 'react-native'
 import { ButtonEnum } from '../constants'
 import { Color } from '../styles'
 import { CustomButton } from '../components/component.button'
+
+const windowWidth = Dimensions.get('window').width
 
 export interface IHomeComponentStateProps {
   equation: string
@@ -29,6 +34,7 @@ interface IHomeProps extends IHomeComponentStateProps, IHomeComponentDispatchPro
 interface IHomeState {}
 
 export class Home extends React.Component<IHomeProps, IHomeState> {
+  public animatedValue: Animated.Value = new Animated.Value(0)
   constructor(props: IHomeProps) {
     super(props)
     this.state = {} as IHomeState
@@ -43,28 +49,50 @@ export class Home extends React.Component<IHomeProps, IHomeState> {
     })
   }
 
+  animate () {
+    this.animatedValue.setValue(0)
+    Animated.timing(
+      this.animatedValue,
+      {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.linear
+      }
+    ).start()
+  }
+
   onPressAction = (butttonId: ButtonEnum) => () => {
     const {onAddCount} = this.props
     onAddCount(butttonId)
+    if (butttonId === ButtonEnum.AllClear) {
+      this.animate()
+    }
   }
 
   public render() {
     const {equation, onAddCount, result} = this.props
+    const opacity = this.animatedValue.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0, 1, 0]
+    })
+
     return (
       <View style={styles.container}>
-        <StatusBar  backgroundColor="#1d1e22"  barStyle="light-content"/>
+        <StatusBar  backgroundColor='#1d1e22' barStyle='light-content'/>
+
         <ImageBackground  style={[styles.expressionContainer, {alignItems: 'flex-end'}]} source={require('../res/bgBlue.png')}>
           <ScrollView
             ref={ref => this.scrollView = ref}
             ontentContainerStyle={styles.expressionLabelContainer}
             horizontal={true}
             showsHorizontalScrollIndicator={false}
-            onContentSizeChange={(contentWidth, contentHeight)=>{
-              this.scrollView.scrollToEnd({animated: true});
+            onContentSizeChange={(contentWidth, contentHeight) => {
+              this.scrollView.scrollToEnd({animated: true})
             }}>
             <Text style={styles.expressionLabel} numberOfLines={1}>{equation}</Text>
           </ScrollView>
           <Text style={styles.resultLabel} numberOfLines={1}>{result}</Text>
+          <Animated.View style={{ flex: 1, height: 200, width: windowWidth, position: 'absolute', opacity, backgroundColor: '#4a547c'}} />
         </ImageBackground >
         <View style={{ flex: 1, backgroundColor: Color.bgResultView, flexDirection: 'row' }}>
           <View style={{flex: 1, backgroundColor: Color.bgDigitsView}}>
@@ -90,7 +118,10 @@ export class Home extends React.Component<IHomeProps, IHomeState> {
             </View>
           </View>
           <View style={{width: 100, backgroundColor: Color.bgOperatorsView, marginVertical: 0}}>
-            <CustomButton title='CLR'
+            <CustomButton title='AC'
+              buttonStyle={{ backgroundColor: 'transparent', marginHorizontal: 0 }}
+              onPressAction={this.onPressAction(ButtonEnum.AllClear)}/>
+            <CustomButton title='DEL'
               buttonStyle={{ backgroundColor: 'transparent', marginHorizontal: 0 }}
               onPressAction={this.onPressAction(ButtonEnum.Clear)} onLongPressAction={this.onPressAction(ButtonEnum.AllClear)}/>
             <CustomButton title='/' buttonStyle={{ backgroundColor: 'transparent', marginHorizontal: 0 }}
