@@ -6,12 +6,14 @@ export interface State {
   equation: string
   prevResult: string
   result: string
+  error: string
 }
 
 const initialState: State = {
   equation: '',
   prevResult: '',
-  result: ''
+  result: '',
+  error: ''
 }
 
 /*
@@ -21,7 +23,8 @@ const updateExpressionAndResultHandler = (state: State, payload: IPayload): Stat
   ...state,
   equation: payload.expression,
   prevResult: payload.prevResult,
-  result: payload.result
+  result: payload.result,
+  error: payload.error
 })
 
 export const reducer = reducerWithInitialState(initialState)

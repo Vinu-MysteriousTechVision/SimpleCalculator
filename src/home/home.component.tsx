@@ -5,7 +5,8 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
+  BackHandler
 } from 'react-native'
 import { ButtonEnum } from '../constants'
 import { Color } from '../styles'
@@ -20,6 +21,7 @@ export interface IHomeComponentStateProps {
 // just passing event to parent (container) and container handles the event by emitting action of Redux.
 export interface IHomeComponentDispatchProps {
   onAddCount: (butttonId: ButtonEnum) => void
+  onAndroidBack: () => void
 }
 
 interface IHomeProps extends IHomeComponentStateProps, IHomeComponentDispatchProps {}
@@ -30,6 +32,15 @@ export class Home extends React.Component<IHomeProps, IHomeState> {
   constructor(props: IHomeProps) {
     super(props)
     this.state = {} as IHomeState
+  }
+
+  componentWillMount() {
+    const {onAndroidBack} = this.props
+
+    BackHandler.addEventListener('hardwareBackPress', function() {
+      onAndroidBack()
+      return false
+    })
   }
 
   onPressAction = (butttonId: ButtonEnum) => () => {

@@ -9,6 +9,7 @@ export interface IPayload {
   expression: string
   prevResult: string
   result: string
+  error: string
 }
 
 // NOTE: updateExpressionAndResult() === { type: 'Home/updateExpressionAndResult', payload: {} }
@@ -18,17 +19,19 @@ const updateExpressionAndResult = actionCreator<IPayload>('Home/updateExpression
 function calculate(firstOperand: number, operator: string, secondOperand: number) {
   switch (operator) {
     case '+':
-      return firstOperand + secondOperand
+      return String(firstOperand + secondOperand)
     case '-':
-      return firstOperand - secondOperand
+      return String(firstOperand - secondOperand)
     case '*':
-      return firstOperand * secondOperand
+      return String(firstOperand * secondOperand)
     case '/':
-      if (secondOperand === 0)
+      if (firstOperand === 0) {
         console.log('Cannot divide by zero')
-      return secondOperand / firstOperand
+        return 'Error'
+      }
+      return String(secondOperand / firstOperand)
     default:
-    return 0
+    return String(0)
   }
 }
 
@@ -54,6 +57,11 @@ const addCalculationData = (butttonId: ButtonEnum): any => {
       if (aryDigits[aryDigits.length - 1].indexOf('.') > -1) return
     }
 
+    if (String(getState().home.error) === 'Error' && String(butttonId).match(/^[*/+-]$/)) {
+      dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult),  result: String(getState().home.result), error: String(getState().home.error)}))
+      return
+    }
+
     if (tempEquation.length <= 0 && String(butttonId).match(/^[*/]$/)) return
     if (tempEquation.length === 1 && tempEquation.match(/^[+-]$/) && String(butttonId).match(/^[*/]$/)) return
     const val = tempEquation.slice(-1, -2)
@@ -76,7 +84,11 @@ const addCalculationData = (butttonId: ButtonEnum): any => {
     }
 
     let res = evaluate(tempEquation)
-    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult),  result: isNumeric(res) ? String(res) : String(getState().home.result)}))
+    if (String(res) === 'Error') {
+      dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult),  result: isNumeric(res) ? String(res) : String(getState().home.result), error: String(res)}))
+      return
+    }
+    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult),  result: isNumeric(res) ? String(res) : String(getState().home.result), error: ''}))
   }
 }
 
@@ -84,29 +96,33 @@ const removeCalculationData = (butttonId: ButtonEnum): any => {
   return (dispatch: Dispatch<any>, getState: () => RootState) => {
 
     if (butttonId === ButtonEnum.AllClear) {
-      dispatch(updateExpressionAndResult({expression: '', result: '', prevResult: ''}))
+      dispatch(updateExpressionAndResult({expression: '', result: '', prevResult: '', error: ''}))
       return
     }
 
     let tempEquation = getState().home.equation.slice(0, -1)
     if (tempEquation === '') {
-      dispatch(updateExpressionAndResult({expression: '', result: '', prevResult: ''}))
+      dispatch(updateExpressionAndResult({expression: '', result: '', prevResult: '', error: ''}))
       return
     }
     let tempEquationValue = tempEquation
     let res = evaluate(tempEquation)
+    if (String(res) === 'Error') {
+      dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult),  result: isNumeric(res) ? String(res) : String(getState().home.result), error: String(res)}))
+      return
+    }
     while (!isNumeric(res) && tempEquation !== '') {
       tempEquationValue = tempEquationValue.slice(0, -1)
       res = evaluate(tempEquationValue)
     }
     const prevResult = String(getState().home.prevResult)
-    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult), result: isNumeric(res) ? String(res) : String(getState().home.prevResult)}))
+    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult), result: isNumeric(res) ? String(res) : String(getState().home.prevResult), error: ''}))
   }
 }
 
 const getResults = (butttonId: ButtonEnum): any => {
   return (dispatch: Dispatch<any>, getState: () => RootState) => {
-    dispatch(updateExpressionAndResult({expression: String(getState().home.result), result: '', prevResult: ''}))
+    dispatch(updateExpressionAndResult({expression: String(getState().home.result), result: '', prevResult: '', error: ''}))
   }
 }
 
@@ -116,7 +132,7 @@ const evaluate = (expression: String) => {
 
   let isLastdigitIsOperator: boolean = false
   let i = 0
-  let operands: number[] = []
+  let operands: string[] = []
   let operators: string[] = []
 
   while (i < equation.length) {
@@ -131,7 +147,7 @@ const evaluate = (expression: String) => {
         value = value + arySplitEquation[i]
         i++
       }
-      operands.push(Number(value))
+      operands.push(value)
     } else {
       // add as operand
       isLastdigitIsOperator = true
@@ -144,7 +160,7 @@ const evaluate = (expression: String) => {
         operators.pop()
         let value2 = operands[operands.length - 1]
         operands.pop()
-        operands.push(calculate(value1, operator, value2))
+        operands.push(calculate(Number(value1), operator, Number(value2)))
       }
       operators.push(arySplitEquation[i])
       i++
@@ -159,7 +175,7 @@ const evaluate = (expression: String) => {
     operators.pop()
     let value2 = operands[operands.length - 1]
     operands.pop()
-    operands.push(calculate(value1, operator, value2))
+    operands.push(calculate(Number(value1), operator, Number(value2)))
   }
   return operands[0]
 }

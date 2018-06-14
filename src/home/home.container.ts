@@ -14,10 +14,10 @@ interface OwnProps {}
 
 // NOTE: get required value for this screen from Redux's State, and map it to the interface Component wants.
 const mapStateToProps: MapStateToProps<IHomeComponentStateProps, OwnProps, RootState> = (state: RootState, ownProps: OwnProps) => {
-  const {equation, result} = state.home
+  const {equation, result, error} = state.home
   return {
     equation,
-    result
+    result: (error !== '') ? error : result
   }
 }
 
@@ -31,6 +31,9 @@ const mapDispatchToProps: MapDispatchToProps<IHomeComponentDispatchProps, OwnPro
     } else {
       dispatch(actions.addCalculationData(butttonId))
     }
+  },
+  onAndroidBack: () => {
+    dispatch(actions.removeCalculationData(ButtonEnum.AllClear))
   }
 })
 
