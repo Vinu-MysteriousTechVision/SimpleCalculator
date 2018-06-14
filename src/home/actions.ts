@@ -11,23 +11,10 @@ export interface IPayload {
   result: string
 }
 
-export interface ICalcControllerData {
-  firstOperand: number
-  operator: string
-  secondOperand: number
-  res: number
-  aryResults: number[]
-  aryOperators: any
-  arySecondOperands: number[]
-  digit: string
-}
-
 // NOTE: updateExpressionAndResult() === { type: 'Home/updateExpressionAndResult', payload: {} }
 const updateExpressionAndResult = actionCreator<IPayload>('Home/updateExpressionAndResult')
-const updateCalcCondrollerData = actionCreator<ICalcControllerData>('Home/updateCalcCondrollerData')
 
-// A utility method to apply an operator 'op' on operands 'a'
-// and 'b'. Return the result.
+// The method to apply an operator and return the result.
 function calculate(firstOperand: number, operator: string, secondOperand: number) {
   switch (operator) {
     case '+':
@@ -39,7 +26,7 @@ function calculate(firstOperand: number, operator: string, secondOperand: number
     case '/':
       if (secondOperand === 0)
         console.log('Cannot divide by zero')
-      return firstOperand / secondOperand
+      return secondOperand / firstOperand
     default:
     return 0
   }
@@ -67,7 +54,8 @@ const addCalculationData = (butttonId: ButtonEnum): any => {
       if (aryDigits[aryDigits.length - 1].indexOf('.') > -1) return
     }
 
-    if (tempEquation.length <= 1 && String(butttonId).match(/^[*/]$/)) return
+    if (tempEquation.length <= 0 && String(butttonId).match(/^[*/]$/)) return
+    if (tempEquation.length === 1 && tempEquation.match(/^[+-]$/) && String(butttonId).match(/^[*/]$/)) return
     const val = tempEquation.slice(-1, -2)
     if (tempEquation.length > 2 && tempEquation.charAt(tempEquation.length - 2).match(/^[*/]$/)) {
       if (String(butttonId).match(/^[-]$/) && tempEquation.slice(-1).match(/^[-]$/)) {
@@ -76,6 +64,8 @@ const addCalculationData = (butttonId: ButtonEnum): any => {
         tempEquation = tempEquation.slice(0, -1)
       } else if (String(butttonId).match(/^[*/]$/) && tempEquation.slice(-1).match(/^[-]$/)) {
         tempEquation = tempEquation.slice(0, -2) + butttonId
+      } else {
+        tempEquation = getState().home.equation + butttonId
       }
     } else if (tempEquation.slice(-1).match(/^[*/]$/) && String(butttonId).match(/^[-]$/)) {
       tempEquation = getState().home.equation + butttonId
@@ -86,7 +76,7 @@ const addCalculationData = (butttonId: ButtonEnum): any => {
     }
 
     let res = evaluate(tempEquation)
-    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: isNumeric(res) ? String(getState().home.prevResult) : String(getState().home.result),  result: isNumeric(res) ? String(res) : String(getState().home.result)}))
+    dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult),  result: isNumeric(res) ? String(res) : String(getState().home.result)}))
   }
 }
 
@@ -95,12 +85,21 @@ const removeCalculationData = (butttonId: ButtonEnum): any => {
 
     if (butttonId === ButtonEnum.AllClear) {
       dispatch(updateExpressionAndResult({expression: '', result: '', prevResult: ''}))
-      dispatch(updateCalcCondrollerData({firstOperand: 0, operator: '', secondOperand: 0, res: 0, aryResults: [], aryOperators: [], arySecondOperands: [], digit: ''}))
       return
     }
 
     let tempEquation = getState().home.equation.slice(0, -1)
+    if (tempEquation === '') {
+      dispatch(updateExpressionAndResult({expression: '', result: '', prevResult: ''}))
+      return
+    }
+    let tempEquationValue = tempEquation
     let res = evaluate(tempEquation)
+    while (!isNumeric(res) && tempEquation !== '') {
+      tempEquationValue = tempEquationValue.slice(0, -1)
+      res = evaluate(tempEquationValue)
+    }
+    const prevResult = String(getState().home.prevResult)
     dispatch(updateExpressionAndResult({expression: tempEquation, prevResult: String(getState().home.prevResult), result: isNumeric(res) ? String(res) : String(getState().home.prevResult)}))
   }
 }
@@ -121,7 +120,7 @@ const evaluate = (expression: String) => {
   let operators: string[] = []
 
   while (i < equation.length) {
-    let value: string = ''// equation.slice(i, 1)
+    let value: string = ''
     if (arySplitEquation[i].match(/^[0-9.]$/) || (isLastdigitIsOperator && arySplitEquation[i] === '-')) {
       // add as digit
       isLastdigitIsOperator = false
@@ -139,11 +138,11 @@ const evaluate = (expression: String) => {
       // IF lastEquationValue is operator and current value is '-' then its digit
       while ((operators.length > 0) && hasPrecedence(arySplitEquation[i], operators[0])) {
 
-        let value1 = operands[operands.length - 1] //
+        let value1 = operands[operands.length - 1]
         operands.pop()
-        let operator = operators[operators.length - 1] //
+        let operator = operators[operators.length - 1]
         operators.pop()
-        let value2 = operands[operands.length - 1] //
+        let value2 = operands[operands.length - 1]
         operands.pop()
         operands.push(calculate(value1, operator, value2))
       }
@@ -154,11 +153,11 @@ const evaluate = (expression: String) => {
 
   while (operators.length > 0) {
 
-    let value1 = operands[operands.length - 1] //
+    let value1 = operands[operands.length - 1]
     operands.pop()
-    let operator = operators[operators.length - 1] //
+    let operator = operators[operators.length - 1]
     operators.pop()
-    let value2 = operands[operands.length - 1] //
+    let value2 = operands[operands.length - 1]
     operands.pop()
     operands.push(calculate(value1, operator, value2))
   }
@@ -167,7 +166,6 @@ const evaluate = (expression: String) => {
 
 export const actions = {
   updateExpressionAndResult,
-  updateCalcCondrollerData,
   addCalculationData,
   removeCalculationData,
   getResults
