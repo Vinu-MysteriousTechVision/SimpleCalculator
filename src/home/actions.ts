@@ -137,7 +137,7 @@ const evaluate = (expression: String) => {
 
   while (i < equation.length) {
     let value: string = ''
-    if (arySplitEquation[i].match(/^[0-9.]$/) || (isLastdigitIsOperator && arySplitEquation[i] === '-')) {
+    if (arySplitEquation[i].match(/^[0-9.]$/) || (isLastdigitIsOperator && arySplitEquation[i] === '-') || ( i === 0 && arySplitEquation[i].match(/^[+-]$/))) {
       // add as digit
       isLastdigitIsOperator = false
       value = value + arySplitEquation[i]
